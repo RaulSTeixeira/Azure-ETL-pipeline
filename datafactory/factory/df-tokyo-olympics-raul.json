@@ -1,0 +1,9 @@
+{
+	"name": "df-tokyo-olympics-raul",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "7979d4ab-aff2-4262-8ca8-a88fd45f2c4b",
+		"tenantId": "9e3b7689-827e-4e03-8515-69a4df492be4"
+	}
+}
