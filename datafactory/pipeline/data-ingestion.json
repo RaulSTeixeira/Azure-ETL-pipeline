@@ -60,16 +60,9 @@
 				]
 			},
 			{
-				"name": "Copy data1",
+				"name": "Coaches",
 				"type": "Copy",
-				"dependsOn": [
-					{
-						"activity": "Athletes",
-						"dependencyConditions": [
-							"Completed"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -112,39 +105,16 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "All",
+						"referenceName": "Coaches",
 						"type": "DatasetReference"
 					}
 				],
 				"outputs": [
 					{
-						"referenceName": "DelimitedText1",
+						"referenceName": "CoachesSink",
 						"type": "DatasetReference"
 					}
 				]
-			},
-			{
-				"name": "Fail1",
-				"type": "Fail",
-				"dependsOn": [
-					{
-						"activity": "Athletes",
-						"dependencyConditions": [
-							"Failed"
-						]
-					},
-					{
-						"activity": "Copy data1",
-						"dependencyConditions": [
-							"Failed"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"message": "Error copying data",
-					"errorCode": "001"
-				}
 			}
 		],
 		"annotations": []
