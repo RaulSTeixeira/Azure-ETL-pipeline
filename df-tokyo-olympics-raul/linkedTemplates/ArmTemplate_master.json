@@ -23,6 +23,22 @@
 			"type": "string",
 			"defaultValue": "https://tokyoolympicsraul.dfs.core.windows.net/"
 		},
+		"CoachesLinkedService_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://raw.githubusercontent.com/RaulSTeixeira/Azure-tokyo-olympics-project/master/data/Coaches.csv"
+		},
+		"EntriesGenderHTTP_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://raw.githubusercontent.com/RaulSTeixeira/Azure-tokyo-olympics-project/master/data/EntriesGender.csv"
+		},
+		"MedalsHTTP_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://raw.githubusercontent.com/RaulSTeixeira/Azure-tokyo-olympics-project/master/data/Medals.csv"
+		},
+		"TeamsHTTP_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://raw.githubusercontent.com/RaulSTeixeira/Azure-tokyo-olympics-project/master/data/Teams.csv"
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -61,6 +77,18 @@
 					},
 					"AzureDataLakeStorage1_properties_typeProperties_url": {
 						"value": "[parameters('AzureDataLakeStorage1_properties_typeProperties_url')]"
+					},
+					"CoachesLinkedService_properties_typeProperties_url": {
+						"value": "[parameters('CoachesLinkedService_properties_typeProperties_url')]"
+					},
+					"EntriesGenderHTTP_properties_typeProperties_url": {
+						"value": "[parameters('EntriesGenderHTTP_properties_typeProperties_url')]"
+					},
+					"MedalsHTTP_properties_typeProperties_url": {
+						"value": "[parameters('MedalsHTTP_properties_typeProperties_url')]"
+					},
+					"TeamsHTTP_properties_typeProperties_url": {
+						"value": "[parameters('TeamsHTTP_properties_typeProperties_url')]"
 					}
 				}
 			},

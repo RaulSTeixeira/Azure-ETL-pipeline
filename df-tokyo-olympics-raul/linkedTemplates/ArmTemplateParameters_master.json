@@ -17,6 +17,18 @@
 		"AzureDataLakeStorage1_properties_typeProperties_url": {
 			"value": "https://tokyoolympicsraul.dfs.core.windows.net/"
 		},
+		"CoachesLinkedService_properties_typeProperties_url": {
+			"value": "https://raw.githubusercontent.com/RaulSTeixeira/Azure-tokyo-olympics-project/master/data/Coaches.csv"
+		},
+		"EntriesGenderHTTP_properties_typeProperties_url": {
+			"value": "https://raw.githubusercontent.com/RaulSTeixeira/Azure-tokyo-olympics-project/master/data/EntriesGender.csv"
+		},
+		"MedalsHTTP_properties_typeProperties_url": {
+			"value": "https://raw.githubusercontent.com/RaulSTeixeira/Azure-tokyo-olympics-project/master/data/Medals.csv"
+		},
+		"TeamsHTTP_properties_typeProperties_url": {
+			"value": "https://raw.githubusercontent.com/RaulSTeixeira/Azure-tokyo-olympics-project/master/data/Teams.csv"
+		},
 		"containerUri": {
 			"value": ""
 		},
