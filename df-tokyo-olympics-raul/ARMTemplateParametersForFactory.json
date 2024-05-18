@@ -8,6 +8,9 @@
 		"AzureDataLakeStorage1_accountKey": {
 			"value": ""
 		},
+		"All_properties_typeProperties_url": {
+			"value": "https://raw.githubusercontent.com/RaulSTeixeira/Azure-tokyo-olympics-project/master/data/*.csv"
+		},
 		"Athletes_properties_typeProperties_url": {
 			"value": "https://raw.githubusercontent.com/RaulSTeixeira/Azure-tokyo-olympics-project/master/data/Athletes.csv"
 		},

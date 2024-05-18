@@ -11,6 +11,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'AzureDataLakeStorage1'"
 		},
+		"All_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://raw.githubusercontent.com/RaulSTeixeira/Azure-tokyo-olympics-project/master/data/*.csv"
+		},
 		"Athletes_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://raw.githubusercontent.com/RaulSTeixeira/Azure-tokyo-olympics-project/master/data/Athletes.csv"
@@ -48,6 +52,9 @@
 					},
 					"AzureDataLakeStorage1_accountKey": {
 						"value": "[parameters('AzureDataLakeStorage1_accountKey')]"
+					},
+					"All_properties_typeProperties_url": {
+						"value": "[parameters('All_properties_typeProperties_url')]"
 					},
 					"Athletes_properties_typeProperties_url": {
 						"value": "[parameters('Athletes_properties_typeProperties_url')]"
