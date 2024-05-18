@@ -1,0 +1,23 @@
+{
+	"name": "All",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "All",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "HttpServerLocation",
+				"relativeUrl": "RaulSTeixeira/Azure-tokyo-olympics-project/master/data/Coaches.csv"
+			},
+			"columnDelimiter": ",",
+			"rowDelimiter": "\n",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
