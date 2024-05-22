@@ -314,6 +314,47 @@
 						"type": "DatasetReference"
 					}
 				]
+			},
+			{
+				"name": "Fail1",
+				"type": "Fail",
+				"dependsOn": [
+					{
+						"activity": "Athletes",
+						"dependencyConditions": [
+							"Failed"
+						]
+					},
+					{
+						"activity": "Coaches",
+						"dependencyConditions": [
+							"Failed"
+						]
+					},
+					{
+						"activity": "EntriesGender",
+						"dependencyConditions": [
+							"Failed"
+						]
+					},
+					{
+						"activity": "Medals",
+						"dependencyConditions": [
+							"Failed"
+						]
+					},
+					{
+						"activity": "Teams",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"message": "Error copying data",
+					"errorCode": "101"
+				}
 			}
 		],
 		"annotations": []
