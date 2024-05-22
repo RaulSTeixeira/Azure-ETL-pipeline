@@ -194,7 +194,7 @@
 					{
 						"activity": "EntriesGender",
 						"dependencyConditions": [
-							"Completed"
+							"Succeeded"
 						]
 					}
 				],
