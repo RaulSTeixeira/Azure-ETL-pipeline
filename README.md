@@ -1,4 +1,4 @@
-# Data Engineer Foundations: Azure Tokyo Olympics
+# Data Engineer Foundations: Azure ETL pipeline
 
 ## Introduction
 
