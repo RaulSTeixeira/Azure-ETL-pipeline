@@ -23,7 +23,7 @@ To keep things simple I've added the source data to github, in csv format, from 
 
 ![Pipeline2 drawio (1)](https://github.com/RaulSTeixeira/Azure-tokyo-olympics-project/assets/118553146/1ce08a90-a100-4a06-bbdf-edf539824b56)
 
-## DataSource
+## Data Source
 The data used in this project is from Tokyo Olympics 2021, available at: https://www.kaggle.com/datasets/arjunprasadsarkhel/2021-olympics-in-tokyo
 
 ## Data Ingestion
