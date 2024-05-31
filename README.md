@@ -59,6 +59,114 @@ extra_configs = configs)
 
 NOTE: This connection methode was used to keep things simple, but it is not the recomended way to perform this connection, for more information on how to properly connect databricks to data lake, see [HERE](https://docs.databricks.com/en/connect/storage/azure-storage.html#language-Azure%C2%A0service%C2%A0principal)
 
+Databricks automaticaly creates a spark session, that you can retrieve some information by using the command "spark".
+
+```python
+SparkSession - hive
+
+SparkContext
+
+Spark UI
+
+Version
+v3.4.1
+Master
+local[*, 4]
+AppName
+Databricks Shell
+```
+
+The CSV files were read and converted to spark dataframes using PySpark, mantaining original schema and headers. The athletes full name was separeted into first and last name.
+
+```python
+# Create a function to read and convert all csv files in a specific folder, the function also outputs the structure and a snipet of each dataframe
+def read_csv_files(files):
+    for a in files:
+        globals()[a] = spark.read.format("csv").option("header", "true").option("inferSchema", "true").load(f'dbfs:/mnt/tokyoolympic/raw-data/{a}.csv')
+        print(a)
+        globals()[a].printSchema()
+        globals()[a].show()
+    return globals()[a]
+
+files_name = ["Athletes", "Coaches", "EntriesGender", "Medals", "Teams"]
+read_csv_files(files_name)
+
+# Create a new table for the Athetes that separates the first and last name
+
+# Create the new FirstName and LastName fields
+Athletes_transformed = Athletes.withColumn("FirstName", split(col("PersonName"), " ").getItem(1)).withColumn("LastName", split(col("PersonName"), " ").getItem(0))
+
+# Remove the PersonName field
+Athletes_transformed = Athletes_transformed.drop("PersonName")
+
+display(Athletes_transformed.limit(5))
+```
+
+I also did some experiments and small data analysis using pyspark.sql module and %sql "Magic" that allows you to directly work with SQL to query data. For this you need to create a temporary view using "createOrReplaceTempView"
+
+```python
+# Order medals table by descending order and display first 10 countries
+Medals.orderBy("Gold", ascending=False).select("Team_Country","Gold").limit(10).display()
+
+# Calculate the average number of entries by gender for each discipline
+average_entries_by_gender = EntriesGender.withColumn(
+    'Avg_Female', EntriesGender['Female'] / EntriesGender['Total']
+).withColumn(
+    'Avg_Male', EntriesGender['Male'] / EntriesGender['Total']
+)
+average_entries_by_gender.show()
+
+# Run querys using SQL to find all the athletes from Portugal
+
+# Create a temporary view so it can be used by spark SQL library
+Athletes_transformed.createOrReplaceTempView("athletestransformed")
+
+spark_df = spark.sql("SELECT * FROM athletestransformed WHERE Country = 'Portugal'")
+display(spark_df)
+```
+```sql
+%sql
+-- Use SQL directly with the 'magic' %sql
+-- Dont forget to create a temp view (already done in previous block)
+-- Count Portuguese athletes
+SELECT COUNT(*) AS Number_Portuguese_Athletes
+FROM athletestransformed
+Where Country = 'Portugal'
+
+%sql
+
+-- Use SQL directly with the 'magic' %sql
+-- Count portuguese athletes last name
+    
+SELECT 
+  LastName,
+  COUNT (LastName) AS name_count
+FROM athletestransformed
+WHERE Country = 'Portugal'
+GROUP BY LastName
+ORDER BY name_count DESC
+```
+It is also possible to convert spark dataframes to pandas dataframes, allowing to use a widly used sintax.
+
+```python
+EntriesGender_pandas_df = EntriesGender.select("*").toPandas()
+
+EntriesGender_pandas_df['Avg_Female'] = EntriesGender_pandas_df['Female'] / EntriesGender_pandas_df['Total']
+EntriesGender_pandas_df['Avg_Male'] = 1 - EntriesGender_pandas_df['Avg_Female']
+```
+Finaly after the transformations, all the modified dataframes were writen back do azure datalake.
+
+```python
+# Write modified dataframes back to Azure Data Lake
+# We can define the number of partitons per each dataframe using ".repartition(numPartitions, *cols)", this method allows to define the number of partions that the table will have and by which column (hash partitioned), ".rdd.getNumPartitions()" allows to see the amount of partitions
+
+def write_df(df):
+    for a in df:
+        globals()[a].repartition(1).write.mode("overwrite").option("header",'true').csv(f"/mnt/tokyoolympic/transformed-data/{a}")
+
+df_names = ["Athletes_transformed", "Coaches", "EntriesGender", "Medals", "Teams"]
+write_df(df_names)
+```
 
 ### Data Analysis
 
