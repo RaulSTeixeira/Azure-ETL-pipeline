@@ -35,9 +35,30 @@ It consists of five different CSV files:
 
 ## Data Ingestion
 
+
+
 ### Data Storage
 
 ## Data Transformation
+After data ingestion, Databricks was used to performe some transformations. The first step was to connect databricks to data lake storage, which was performed using mounting storage. Databricks enables users to mount cloud object storage to the Databricks File System (DBFS) to simplify data access. More information is available [HERE](https://docs.databricks.com/en/dbfs/mounts.html)
+
+```python
+ # Establish connection with ADLS
+
+configs = {"fs.azure.account.auth.type": "OAuth",
+"fs.azure.account.oauth.provider.type": "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider",
+"fs.azure.account.oauth2.client.id": "XXXXXXXXXXXXXXXXX",
+"fs.azure.account.oauth2.client.secret": 'XXXXXXXXXXXXXXX',
+"fs.azure.account.oauth2.client.endpoint": "https://login.microsoftonline.com/XXXXXXXXXXXX/oauth2/token"}
+
+dbutils.fs.mount(
+source = "abfss://XXXXXXXXXXXXXXX@XXXXXXXXXXX.dfs.core.windows.net", # contrainer@storageacc
+mount_point = "/mnt/tokyoolympic",
+extra_configs = configs)
+```
+
+NOTE: This connection methode was used to keep things simple, but it is not the recomended way to perform this connection, for more information on how to properly connect databricks to data lake, see [HERE](https://docs.databricks.com/en/connect/storage/azure-storage.html#language-Azure%C2%A0service%C2%A0principal)
+
 
 ### Data Analysis
 
