@@ -22,9 +22,15 @@ To keep things simple I've added the source data to github, in csv format, from 
 ## Arquitecture Overview
 
 ![Pipeline2 drawio (1)](https://github.com/RaulSTeixeira/Azure-tokyo-olympics-project/assets/118553146/1ce08a90-a100-4a06-bbdf-edf539824b56)
+- Data Factory was used to ingest data, using as source type HTTP (csv files hosted in Github) and sinking data to Data Lake Storage Gen2;
+- DataBricks was connected to Data Lake and used to transform data;
+- Synapse Analytics hosted the SQL database and was connected to Data Lake;
 
 ## Data Source
-The data used in this project is from Tokyo Olympics 2021, available at: https://www.kaggle.com/datasets/arjunprasadsarkhel/2021-olympics-in-tokyo
+The data used in this project is from Tokyo Olympics 2021, available at: https://www.kaggle.com/datasets/arjunprasadsarkhel/2021-olympics-in-tokyo.
+It consists of five different CSV files:
+
+![image](https://github.com/RaulSTeixeira/Azure-tokyo-olympics-project/assets/118553146/62087d3a-f628-40b2-a532-7fa72a0949d3)
 
 ## Data Ingestion
 
