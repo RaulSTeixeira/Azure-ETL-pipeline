@@ -10,7 +10,28 @@ To keep things simple I've added the source data to github, in csv format, from 
 
 ## Table of Contents
 
-- [Create a database to use for the pipeline](#Arquitecture-Overview)
+- [Arquitecture overview](#Arquitecture-Overview)
+- [Used data](#DataSource)
+- [Extract data from github using Data Factory](#Data-Ingestion)
+- [Data Storage using Data Lake Storage Gen 2](#Data-Storage)
+- [Transform data using Databricks](#Data-Transformation)
+- [Load data with Synapse Analytics](#Load-Data-into-SQL-Database)
+- [Data analys](#Data-Analysis)
+
 
 ## Arquitecture Overview
 
+![Pipeline2 drawio (1)](https://github.com/RaulSTeixeira/Azure-tokyo-olympics-project/assets/118553146/1ce08a90-a100-4a06-bbdf-edf539824b56)
+
+## DataSource
+The data used in this project is from Tokyo Olympics 2021, available at: https://www.kaggle.com/datasets/arjunprasadsarkhel/2021-olympics-in-tokyo
+
+## Data Ingestion
+
+### Data Storage
+
+## Data Transformation
+
+### Data Analysis
+
+## Load Data into SQL Database
