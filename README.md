@@ -27,7 +27,8 @@ To keep things simple I've added the source data to github, in csv format, from 
 - Synapse Analytics hosted the SQL database and was connected to Data Lake;
 
 ## Data Source
-The data used in this project is from Tokyo Olympics 2021, available at: https://www.kaggle.com/datasets/arjunprasadsarkhel/2021-olympics-in-tokyo.
+The data used in this project is from Tokyo Olympics 2021, available at: [Kaggle]([https://www.kaggle.com/datasets/arjunprasadsarkhel/2021-olympics-in-toky])
+
 It consists of five different CSV files:
 
 ![image](https://github.com/RaulSTeixeira/Azure-tokyo-olympics-project/assets/118553146/62087d3a-f628-40b2-a532-7fa72a0949d3)
