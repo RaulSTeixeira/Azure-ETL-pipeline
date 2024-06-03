@@ -4,19 +4,19 @@
 
 The aim of this project is to create an ETL pipeline to first extract data from a datasource, then transform and aggregate the data so that analytics can be derived easily and finally load the transformed data into a SQL database.
 
-This pipeline will use tools from Azure, including Data Factory, Databricks, Data Lake Storage Gen2 and Synapse Analytics. PowerBi might be added in the future, for visualizations.
+This pipeline uses tools from Azure, including Data Factory, Databricks, Data Lake Storage Gen2 and Synapse Analytics. PowerBi might be added in the future, for visualizations.
 
-To keep things simple I've added the source data to github, in csv format, from where Data Factory can connect and extract the necessary data.
+To keep things simple I've added the source data to github, in csv format, from where Data Factory can connect and ingest data.
 
 ## Table of Contents
 
 - [Arquitecture overview](#Arquitecture-Overview)
-- [Used data](#DataSource)
-- [Extract data from github using Data Factory](#Data-Ingestion)
-- [Data Storage using Data Lake Storage Gen 2](#Data-Storage)
-- [Transform data using Databricks](#Data-Transformation)
-- [Load data with Synapse Analytics](#Load-Data-into-SQL-Database)
-- [Data analys](#Data-Analysis)
+- [Data Source](#DataSource)
+- [Data Ingestion](#Data-Ingestion)
+- [Data Storage](#Data-Storage)
+- [Data Transformation](#Data-Transformation)
+- [Data Load](#Data-Load)
+- [Data Analysis](#Data-Analysis)
 
 
 ## Arquitecture Overview
@@ -167,7 +167,6 @@ def write_df(df):
 df_names = ["Athletes_transformed", "Coaches", "EntriesGender", "Medals", "Teams"]
 write_df(df_names)
 ```
+### Data Load
 
 ### Data Analysis
-
-## Load Data into SQL Database
