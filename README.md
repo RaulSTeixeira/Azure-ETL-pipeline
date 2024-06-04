@@ -11,7 +11,7 @@ To keep things simple I've added the source data to github, in csv format, from 
 ## Table of Contents
 
 - [Arquitecture overview](#Arquitecture-Overview)
-- [Data Source](#DataSource)
+- [Source of data](#Source-of-data)
 - [Data Ingestion](#Data-Ingestion)
 - [Data Storage](#Data-Storage)
 - [Data Transformation](#Data-Transformation)
@@ -26,7 +26,7 @@ To keep things simple I've added the source data to github, in csv format, from 
 - DataBricks was connected to Data Lake and used to transform data;
 - Synapse Analytics hosted the SQL database and was connected to Data Lake;
 
-## Data Source
+## Source of data
 The data used in this project is from Tokyo Olympics 2021, available at: [Kaggle](https://www.kaggle.com/datasets/arjunprasadsarkhel/2021-olympics-in-tokyo)
 
 It consists of five different CSV files:
@@ -34,10 +34,52 @@ It consists of five different CSV files:
 ![image](https://github.com/RaulSTeixeira/Azure-tokyo-olympics-project/assets/118553146/62087d3a-f628-40b2-a532-7fa72a0949d3)
 
 ## Data Ingestion
+For data ingestion a pipeline was developed in Data Factory, using the Copy data Activity. This requires a Source and a Sink to be defined. For this case, since the data was available in github, the source type is a generic protocol HTTP with DelimitedText format (CSV) and the first row was used as header. A linked service was also defined, where the URL of the specific file is placed. Even though this was performed using the graphical interface, it can also be defined in a JSON format:
 
+```json
+{
+	"name": "MedalsSource",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "MedalsHTTP",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "HttpServerLocation"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
 
+{
+	"name": "MedalsHTTP",
+	"properties": {
+		"annotations": [],
+		"type": "HttpServer",
+		"typeProperties": {
+			"url": "https://raw.githubusercontent.com/RaulSTeixeira/Azure-tokyo-olympics-project/master/data/Medals.csv",
+			"enableServerCertificateValidation": true,
+			"authenticationType": "Anonymous"
+		}
+	}
+}
+```
 
-### Data Storage
+To keep things simple, the authentication method was kept as anonymous.
+For the Sink, a linked service to Data Lake Gen2 was made to a previously created container. In this container two folders were defined, one for the raw_data and another to the transformed_data (used at a later stage). Again using DelimitedText format (CSV) and the first row as header.
+
+Since data factory only stores the most recent version of a pipeline (after publishing), data factory was connected to github to allow version control and track of changes. Since this is a personal project, every change was published in the master branch.
+
+Here is a preview of the pipeline:
+![data factory pipeline3](https://github.com/RaulSTeixeira/Azure-tokyo-olympics-project/assets/118553146/bb5386a6-60b7-44bd-bbe6-449c537c0225)
 
 ## Data Transformation
 After data ingestion, Databricks was used to performe some transformations. The first step was to connect databricks to data lake storage, which was performed using mounting storage. Databricks enables users to mount cloud object storage to the Databricks File System (DBFS) to simplify data access. More information is available [HERE](https://docs.databricks.com/en/dbfs/mounts.html)
