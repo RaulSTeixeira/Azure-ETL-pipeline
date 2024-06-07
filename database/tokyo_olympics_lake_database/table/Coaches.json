@@ -1,7 +1,7 @@
 {
-	"name": "Athletes",
+	"name": "Coaches",
 	"properties": {
-		"Name": "Athletes",
+		"Name": "Coaches",
 		"EntityType": "TABLE",
 		"Namespace": {
 			"DatabaseName": "tokyo_olympics_lake_database"
@@ -13,6 +13,19 @@
 		},
 		"StorageDescriptor": {
 			"Columns": [
+				{
+					"Name": "Name",
+					"OriginDataTypeName": {
+						"TypeName": "string",
+						"IsComplexType": false,
+						"IsNullable": false,
+						"Length": 8000,
+						"Properties": {
+							"HIVE_TYPE_STRING": "string"
+						}
+					},
+					"DeltaFormatInvalidMessages": []
+				},
 				{
 					"Name": "Country",
 					"OriginDataTypeName": {
@@ -40,24 +53,11 @@
 					"DeltaFormatInvalidMessages": []
 				},
 				{
-					"Name": "FirstName",
+					"Name": "Event",
 					"OriginDataTypeName": {
 						"TypeName": "string",
 						"IsComplexType": false,
-						"IsNullable": false,
-						"Length": 8000,
-						"Properties": {
-							"HIVE_TYPE_STRING": "string"
-						}
-					},
-					"DeltaFormatInvalidMessages": []
-				},
-				{
-					"Name": "LastName",
-					"OriginDataTypeName": {
-						"TypeName": "string",
-						"IsComplexType": false,
-						"IsNullable": false,
+						"IsNullable": true,
 						"Length": 8000,
 						"Properties": {
 							"HIVE_TYPE_STRING": "string"
@@ -72,7 +72,7 @@
 				"FormatType": "csv",
 				"SerializeLib": "org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe",
 				"Properties": {
-					"path": "abfss://tokyo-olympics-container@tokyoolympicsraul.dfs.core.windows.net/transformed-data/Athletes_transformed",
+					"path": "abfss://tokyo-olympics-container@tokyoolympicsraul.dfs.core.windows.net/transformed-data/Coaches",
 					"delimiter": ",",
 					"multiLine": "false",
 					"firstRowAsHeader": "true",
@@ -83,7 +83,7 @@
 			},
 			"Source": {
 				"Provider": "ADLS",
-				"Location": "abfss://tokyo-olympics-container@tokyoolympicsraul.dfs.core.windows.net/transformed-data/Athletes_transformed",
+				"Location": "abfss://tokyo-olympics-container@tokyoolympicsraul.dfs.core.windows.net/transformed-data/Coaches",
 				"Properties": {
 					"LinkedServiceName": "synapse-tokyo-olympics-WorkspaceDefaultStorage",
 					"LocationSetToDatabaseDefault": false
@@ -91,7 +91,7 @@
 			},
 			"Properties": {
 				"textinputformat.record.delimiter": ",",
-				"compression": "{\"type\":\"None\",\"level\":\"optimal\"}",
+				"compression": "",
 				"derivedModelAttributeInfo": "{\"attributeReferences\":{}}"
 			},
 			"Compressed": false,
@@ -100,7 +100,7 @@
 		"Properties": {
 			"Description": "",
 			"DisplayFolderInfo": "{\"name\":\"Others\",\"colorCode\":\"\"}",
-			"PrimaryKeys": "FirstName,LastName",
+			"PrimaryKeys": "Name",
 			"spark.sql.sources.provider": "csv"
 		},
 		"Retention": 0,

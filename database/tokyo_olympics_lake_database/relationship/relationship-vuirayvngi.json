@@ -1,0 +1,23 @@
+{
+	"name": "relationship-vuirayvngi",
+	"properties": {
+		"Name": "relationship-vuirayvngi",
+		"EntityType": "RELATIONSHIP",
+		"Namespace": {
+			"DatabaseName": "tokyo_olympics_lake_database"
+		},
+		"Origin": {
+			"Type": "SPARK"
+		},
+		"FromTableName": "Athletes",
+		"ToTableName": "Coaches",
+		"ColumnRelationshipInformations": [
+			{
+				"FromColumnName": "Country",
+				"ToColumnName": "Country"
+			}
+		],
+		"RelationshipType": 0
+	},
+	"type": "RELATIONSHIP"
+}
