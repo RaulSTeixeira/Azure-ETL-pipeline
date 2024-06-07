@@ -210,5 +210,25 @@ df_names = ["Athletes_transformed", "Coaches", "EntriesGender", "Medals", "Teams
 write_df(df_names)
 ```
 ### Data Load
+During the creation of the Synapse Analytics workspace is necessary to create or select a Data Lake Storage Gen2, serving as the primary storage account for the workspace, holding catalog data and metadata.
+Since i have selected the previously created Data Lake, where olympics data files are already stored, they automatically become acessible from synapse analytics.
+
+Using the serverless SQL pool available by default in Synapse Analytics, it's a fast and easy way to read the content of the files from our datalake.
+
+The OPENROWSET(BULK...) function allows to access files in Azure Storage. OPENROWSET function reads content of a remote data source and returns the content as a set of rows:
+
+```sql
+SELECT
+    TOP 100 *
+FROM
+    OPENROWSET(
+        BULK 'https://tokyoolympicsraul.dfs.core.windows.net/tokyo-olympics-container/transformed-data/Athletes_transformed/**',
+        FORMAT = 'CSV',
+        PARSER_VERSION = '2.0',
+        HEADER_ROW = True
+    ) AS [result]
+
+```
+
 
 ### Data Analysis
