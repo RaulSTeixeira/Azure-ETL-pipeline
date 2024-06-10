@@ -94,72 +94,12 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/SQL script 1')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"content": {
-					"query": "SELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://tokyoolympicsraul.dfs.core.windows.net/tokyo-olympics-container/transformed-data/Athletes_transformed/**',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = True\n    ) AS [result]\n",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "master",
-						"poolName": "Built-in"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/SQL script 3')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"content": {
-					"query": "Use tokyo_olympics_lake_database\nGO\n\nALTER TABLE Athletes\n   ADD ID INT\n       CONSTRAINT PK_Athletes PRIMARY KEY CLUSTERED\n\n\n--ALTER TABLE dbo.YourTable\n--   ADD ID INT IDENTITY\n--      CONSTRAINT PK_YourTable PRIMARY KEY CLUSTERED",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "tokyo_olympics_lake_database",
-						"poolName": "Built-in"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/SQL script 4')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"content": {
-					"query": "--TRUNCATE TABLE dbo.Athletes;\n\nSELECT * FROM dbo.Athletes\nORDER BY AthleteID ",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "tokyo_olympics_DB",
-						"poolName": "tokyo_olympics_DB"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
-			},
-			"dependsOn": []
-		},
-		{
 			"name": "[concat(parameters('workspaceName'), '/create_external_tables_serverless')]",
 			"type": "Microsoft.Synapse/workspaces/sqlscripts",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"content": {
-					"query": "-- Creating a Serverless SQL Database\nCREATE DATABASE TokyoTestDB\n    COLLATE Latin1_General_100_BIN2_UTF8;\nGO\n\nUSE TokyoTestDB;\nGO\n\n-- Create external datasource\nCREATE EXTERNAL DATA SOURCE files\nWITH (\n    LOCATION = 'https://tokyoolympicsraul.dfs.core.windows.net/tokyo-olympics-container/transformed-data/'\n);\n\n-- Create external file format\nCREATE EXTERNAL FILE FORMAT CsvFormat\n    WITH (\n        FORMAT_TYPE = DELIMITEDTEXT,\n        FORMAT_OPTIONS(\n            FIELD_TERMINATOR = ',',\n            STRING_DELIMITER = '\"',\n            FIRST_ROW = 2 -- this specifies the first row to be read, since we have a header we only start at the second one\n        )\n    );\nGO\n\n-- Create external tables\nCREATE EXTERNAL TABLE dbo.Athletes\n(\n    Country NVARCHAR(80),\n    Discipline NVARCHAR(80),\n    FirstName NVARCHAR(50),\n    LastName NVARCHAR(50)\n)\nWITH\n(\n    DATA_SOURCE = files,\n    LOCATION = 'Athletes_transformed/*.csv',\n    FILE_FORMAT = CsvFormat\n);\nGO\n\n\n-- query the tables\nSELECT * FROM dbo.Athletes;\n\n-- sintax to drop tables and file format\nDROP EXTERNAL TABLE dbo.Athletes\nDROP EXTERNAL FILE FORMAT CsvFormat",
+					"query": "-- Creating a Serverless SQL Database\nCREATE DATABASE TokyoTestDB\n    COLLATE Latin1_General_100_BIN2_UTF8;\nGO\n\nUSE TokyoTestDB;\nGO\n\n-- Create external datasource\nCREATE EXTERNAL DATA SOURCE files\nWITH (\n    LOCATION = 'https://tokyoolympicsraul.dfs.core.windows.net/tokyo-olympics-container/transformed-data/'\n);\n\n-- Create external file format\nCREATE EXTERNAL FILE FORMAT CsvFormat\n    WITH (\n        FORMAT_TYPE = DELIMITEDTEXT,\n        FORMAT_OPTIONS(\n            FIELD_TERMINATOR = ',',\n            STRING_DELIMITER = '\"',\n            FIRST_ROW = 2 -- this specifies the first row to be read, since we have a header we only start at the second one\n        )\n    );\nGO\n\n-- Create external tables\nCREATE EXTERNAL TABLE dbo.Athletes\n(\n    Country NVARCHAR(80),\n    Discipline NVARCHAR(80),\n    FirstName NVARCHAR(50),\n    LastName NVARCHAR(50)\n)\nWITH\n(\n    DATA_SOURCE = files,\n    LOCATION = 'Athletes_transformed/*.csv',\n    FILE_FORMAT = CsvFormat\n);\nGO\n\nCREATE EXTERNAL TABLE dbo.Coaches\n(\n    Name NVARCHAR(80),\n    Country NVARCHAR(80),\n    Discipline NVARCHAR(50),\n    Event NVARCHAR(50)\n)\nWITH\n(\n    DATA_SOURCE = files,\n    LOCATION = 'Coaches/*.csv',\n    FILE_FORMAT = CsvFormat\n);\nGO\n\n-- query the tables\nSELECT * FROM dbo.Athletes;\nSELECT * FROM dbo.Coaches;\n\n-- sintax to drop tables and file format\nDROP EXTERNAL TABLE dbo.Athletes\nDROP EXTERNAL FILE FORMAT CsvFormat",
 					"metadata": {
 						"language": "sql"
 					},
@@ -174,12 +114,12 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/create_tables')]",
+			"name": "[concat(parameters('workspaceName'), '/create_tables_dedicated')]",
 			"type": "Microsoft.Synapse/workspaces/sqlscripts",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"content": {
-					"query": "DROP TABLE dbo.Athletes\n\n-- Tables created in synape analytics SQL pool does not suport primary and foreight keys, since the \nCREATE TABLE dbo.Athletes\n(\n    AthleteID INT PRIMARY KEY NONCLUSTERED NOT ENFORCED IDENTITY(1,1) NOT NULL, --IDENTITY [ (seed , increment) ] seed is the first value and increment is the amount added to the previous row\n    Country NVARCHAR(80) NULL,\n    Discipline NVARCHAR(80) NOT NULL,\n    FirstName NVARCHAR(50) NULL,\n    LastName NVARCHAR(50) NULL\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE\n    --CLUSTERED COLUMNSTORE INDEX\n);\n\nDROP TABLE dbo.Coaches\n\nCREATE TABLE dbo.Coaches\n(\n    CoacheID INT IDENTITY NOT NULL,\n    Country NVARCHAR(80) NULL,\n    Discipline NVARCHAR(80) NOT NULL,\n    Event NVARCHAR(50) NULL\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n);\n\n\n",
+					"query": "DROP TABLE dbo.Athletes\n\n-- Tables created in synape analytics SQL pool does not suport foreight keys\nCREATE TABLE dbo.Athletes\n(\n    AthleteID INT PRIMARY KEY NONCLUSTERED NOT ENFORCED IDENTITY(1,1) NOT NULL, --IDENTITY [ (seed , increment) ] seed is the first value and increment is the amount added to the previous row\n    Country NVARCHAR(80) NULL,\n    Discipline NVARCHAR(80) NOT NULL,\n    FirstName NVARCHAR(50) NULL,\n    LastName NVARCHAR(50) NULL\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE\n    --CLUSTERED COLUMNSTORE INDEX\n);\n\nDROP TABLE dbo.Coaches\n\nCREATE TABLE dbo.Coaches\n(\n    CoacheID INT IDENTITY NOT NULL,\n    Country NVARCHAR(80) NULL,\n    Discipline NVARCHAR(80) NOT NULL,\n    Event NVARCHAR(50) NULL\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n);\n\n\nSELECT * FROM dbo.Athletes\nORDER BY AthleteID ",
 					"metadata": {
 						"language": "sql"
 					},
@@ -194,7 +134,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/load_tables')]",
+			"name": "[concat(parameters('workspaceName'), '/load_tables_dedicated')]",
 			"type": "Microsoft.Synapse/workspaces/sqlscripts",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
@@ -206,6 +146,26 @@
 					"currentConnection": {
 						"databaseName": "tokyo_olympics_DB",
 						"poolName": "tokyo_olympics_DB"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/read_tables_openrowset')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "SELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://tokyoolympicsraul.dfs.core.windows.net/tokyo-olympics-container/transformed-data/Athletes_transformed/**',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = True\n    ) AS [result]\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
 					},
 					"resultLimit": 5000
 				},
