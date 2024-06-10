@@ -134,12 +134,72 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script 4')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "--TRUNCATE TABLE dbo.Athletes;\n\nSELECT * FROM dbo.Athletes\nORDER BY AthleteID ",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "tokyo_olympics_DB",
+						"poolName": "tokyo_olympics_DB"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/create_external_tables_serverless')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "-- Creating a Serverless SQL Database\nCREATE DATABASE TokyoTestDB\n    COLLATE Latin1_General_100_BIN2_UTF8;\nGO\n\nUSE TokyoTestDB;\nGO\n\n-- Create external datasource\nCREATE EXTERNAL DATA SOURCE files\nWITH (\n    LOCATION = 'https://tokyoolympicsraul.dfs.core.windows.net/tokyo-olympics-container/transformed-data/'\n);\n\n-- Create external file format\nCREATE EXTERNAL FILE FORMAT CsvFormat\n    WITH (\n        FORMAT_TYPE = DELIMITEDTEXT,\n        FORMAT_OPTIONS(\n            FIELD_TERMINATOR = ',',\n            STRING_DELIMITER = '\"',\n            FIRST_ROW = 2 -- this specifies the first row to be read, since we have a header we only start at the second one\n        )\n    );\nGO\n\n-- Create external tables\nCREATE EXTERNAL TABLE dbo.Athletes\n(\n    Country NVARCHAR(80),\n    Discipline NVARCHAR(80),\n    FirstName NVARCHAR(50),\n    LastName NVARCHAR(50)\n)\nWITH\n(\n    DATA_SOURCE = files,\n    LOCATION = 'Athletes_transformed/*.csv',\n    FILE_FORMAT = CsvFormat\n);\nGO\n\n\n-- query the tables\nSELECT * FROM dbo.Athletes;\n\n-- sintax to drop tables and file format\nDROP EXTERNAL TABLE dbo.Athletes\nDROP EXTERNAL FILE FORMAT CsvFormat",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "TokyoTestDB",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/create_tables')]",
 			"type": "Microsoft.Synapse/workspaces/sqlscripts",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"content": {
-					"query": "\nCREATE TABLE dbo.Athletes\n(\n    AthleteID INT IDENTITY NOT NULL,\n    Country NVARCHAR(80) NULL,\n    Discipline NVARCHAR(80) NOT NULL,\n    FirstName NVARCHAR(50) NULL,\n    LastName NVARCHAR(50) NULL\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n);\n\n",
+					"query": "DROP TABLE dbo.Athletes\n\n-- Tables created in synape analytics SQL pool does not suport primary and foreight keys, since the \nCREATE TABLE dbo.Athletes\n(\n    AthleteID INT PRIMARY KEY NONCLUSTERED NOT ENFORCED IDENTITY(1,1) NOT NULL, --IDENTITY [ (seed , increment) ] seed is the first value and increment is the amount added to the previous row\n    Country NVARCHAR(80) NULL,\n    Discipline NVARCHAR(80) NOT NULL,\n    FirstName NVARCHAR(50) NULL,\n    LastName NVARCHAR(50) NULL\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE\n    --CLUSTERED COLUMNSTORE INDEX\n);\n\nDROP TABLE dbo.Coaches\n\nCREATE TABLE dbo.Coaches\n(\n    CoacheID INT IDENTITY NOT NULL,\n    Country NVARCHAR(80) NULL,\n    Discipline NVARCHAR(80) NOT NULL,\n    Event NVARCHAR(50) NULL\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n);\n\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "tokyo_olympics_DB",
+						"poolName": "tokyo_olympics_DB"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/load_tables')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "COPY INTO dbo.Athletes\n    (Country, Discipline, FirstName, LastName )\nFROM 'https://tokyoolympicsraul.dfs.core.windows.net/tokyo-olympics-container/transformed-data/Athletes_transformed/**.csv'\nWITH\n(\n    FILE_TYPE = 'CSV',\n    MAXERRORS = 0,\n    IDENTITY_INSERT = 'OFF'\n);\n\n",
 					"metadata": {
 						"language": "sql"
 					},
