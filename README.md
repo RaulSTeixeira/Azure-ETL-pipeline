@@ -209,11 +209,12 @@ def write_df(df):
 df_names = ["Athletes_transformed", "Coaches", "EntriesGender", "Medals", "Teams"]
 write_df(df_names)
 ```
-### Data Load
+## Data Load
+### Serverless
 During the creation of the Synapse Analytics workspace is necessary to create or select a Data Lake Storage Gen2, serving as the primary storage account for the workspace, holding catalog data and metadata.
 Since i have selected the previously created Data Lake, where olympics data files are already stored, they automatically become acessible from synapse analytics.
 
-Using the serverless SQL pool available by default in Synapse Analytics, it's a fast and easy way to read the content of the files from our datalake.
+Using the serverless SQL pool available by default in Synapse Analytics, it's a simple way to read the content and structure of the files from our datalake.
 
 The OPENROWSET(BULK...) function allows to access files in Azure Storage. OPENROWSET function reads content of a remote data source and returns the content as a set of rows:
 
@@ -228,6 +229,72 @@ FROM
         HEADER_ROW = True
     ) AS [result]
 
+```
+It is also possible to create a database in a serverless SQL pool, by defining an external datasource (in this case the datalake), an external file format and finally external tables. This provides a relational database layer over files in a data lake, allowing the usage of standard SQL query semantics. This type of tables also have the advantage of always being up-to-date once the data ingestion is performed, since they only store metadata. Droping external tables does not delete the source data, only the stored metadata.
+
+Here is an example of creating external tables, just for the athletes and coaches:
+
+```sql
+-- Creating a Serverless SQL Database
+CREATE DATABASE TokyoTestDB
+    COLLATE Latin1_General_100_BIN2_UTF8;
+GO
+
+USE TokyoTestDB;
+GO
+
+-- Create external datasource
+CREATE EXTERNAL DATA SOURCE files
+WITH (
+    LOCATION = 'https://tokyoolympicsraul.dfs.core.windows.net/tokyo-olympics-container/transformed-data/'
+);
+
+-- Create external file format
+CREATE EXTERNAL FILE FORMAT CsvFormat
+    WITH (
+        FORMAT_TYPE = DELIMITEDTEXT,
+        FORMAT_OPTIONS(
+            FIELD_TERMINATOR = ',',
+            STRING_DELIMITER = '"',
+            FIRST_ROW = 2 -- this specifies the first row to be read, since we have a header we only start at the second one
+        )
+    );
+GO
+
+-- Create external tables
+CREATE EXTERNAL TABLE dbo.Athletes
+(
+    Country NVARCHAR(80),
+    Discipline NVARCHAR(80),
+    FirstName NVARCHAR(50),
+    LastName NVARCHAR(50)
+)
+WITH
+(
+    DATA_SOURCE = files,
+    LOCATION = 'Athletes_transformed/*.csv',
+    FILE_FORMAT = CsvFormat
+);
+GO
+
+CREATE EXTERNAL TABLE dbo.Coaches
+(
+    Name NVARCHAR(80),
+    Country NVARCHAR(80),
+    Discipline NVARCHAR(50),
+    Event NVARCHAR(50)
+)
+WITH
+(
+    DATA_SOURCE = files,
+    LOCATION = 'Coaches/*.csv',
+    FILE_FORMAT = CsvFormat
+);
+GO
+
+-- sintax to drop tables and file format
+--DROP EXTERNAL TABLE dbo.Athletes
+--DROP EXTERNAL FILE FORMAT CsvFormat
 ```
 
 
