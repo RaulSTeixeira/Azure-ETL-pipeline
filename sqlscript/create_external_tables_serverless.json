@@ -1,0 +1,17 @@
+{
+	"name": "create_external_tables_serverless",
+	"properties": {
+		"content": {
+			"query": "-- Creating a Serverless SQL Database\nCREATE DATABASE TokyoTestDB\n    COLLATE Latin1_General_100_BIN2_UTF8;\nGO\n\nUSE TokyoTestDB;\nGO\n\n-- Create external datasource\nCREATE EXTERNAL DATA SOURCE files\nWITH (\n    LOCATION = 'https://tokyoolympicsraul.dfs.core.windows.net/tokyo-olympics-container/transformed-data/'\n);\n\n-- Create external file format\nCREATE EXTERNAL FILE FORMAT CsvFormat\n    WITH (\n        FORMAT_TYPE = DELIMITEDTEXT,\n        FORMAT_OPTIONS(\n            FIELD_TERMINATOR = ',',\n            STRING_DELIMITER = '\"',\n            FIRST_ROW = 2 -- this specifies the first row to be read, since we have a header we only start at the second one\n        )\n    );\nGO\n\n-- Create external tables\nCREATE EXTERNAL TABLE dbo.Athletes\n(\n    Country NVARCHAR(80),\n    Discipline NVARCHAR(80),\n    FirstName NVARCHAR(50),\n    LastName NVARCHAR(50)\n)\nWITH\n(\n    DATA_SOURCE = files,\n    LOCATION = 'Athletes_transformed/*.csv',\n    FILE_FORMAT = CsvFormat\n);\nGO\n\n\n-- query the tables\nSELECT * FROM dbo.Athletes;\n\n-- sintax to drop tables and file format\nDROP EXTERNAL TABLE dbo.Athletes\nDROP EXTERNAL FILE FORMAT CsvFormat",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "TokyoTestDB",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

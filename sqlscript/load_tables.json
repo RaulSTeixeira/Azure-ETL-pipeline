@@ -1,0 +1,17 @@
+{
+	"name": "load_tables",
+	"properties": {
+		"content": {
+			"query": "COPY INTO dbo.Athletes\n    (Country, Discipline, FirstName, LastName )\nFROM 'https://tokyoolympicsraul.dfs.core.windows.net/tokyo-olympics-container/transformed-data/Athletes_transformed/**.csv'\nWITH\n(\n    FILE_TYPE = 'CSV',\n    MAXERRORS = 0,\n    IDENTITY_INSERT = 'OFF'\n);\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "tokyo_olympics_DB",
+				"poolName": "tokyo_olympics_DB"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
