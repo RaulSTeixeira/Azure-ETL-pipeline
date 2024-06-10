@@ -1,0 +1,17 @@
+{
+	"name": "create_tables",
+	"properties": {
+		"content": {
+			"query": "\nCREATE TABLE dbo.Athletes\n(\n    AthleteID INT IDENTITY NOT NULL,\n    Country NVARCHAR(80) NULL,\n    Discipline NVARCHAR(80) NOT NULL,\n    FirstName NVARCHAR(50) NULL,\n    LastName NVARCHAR(50) NULL\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n);\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "tokyo_olympics_DB",
+				"poolName": "tokyo_olympics_DB"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
