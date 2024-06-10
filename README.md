@@ -298,13 +298,66 @@ GO
 ```
 
 ### Dedicated SQL Pool
-As previously mentioned Synapse Analytics will host the SQL database where data will be loaded, this type of dedicated SQL pool requires a running server that implies extra costs. Nevertheless it acts more like a "regular" database, storing data and allowing for more advanced operations and table relations. As note, Synapse Analytics Dedicated SQL Pool is optimized for data warehousing workloads, having some limitations, such as defining foreight keys.
+As previously mentioned Synapse Analytics will host the SQL database where data will be loaded, this type of dedicated SQL pool requires a running server that implies extra costs (usually charged by hour, instead of charged by query). Nevertheless it acts more like a "regular" database, storing data, metadata and allowing for more advanced operations and table relations. As a note, Synapse Analytics Dedicated SQL Pool is optimized for data warehousing workloads, having some limitations, such as defining foreight keys.
 
 The first step of creating the database is to start a SQL pool (server), for this project the chosen performance was DW100c. More info on DWU's (Data Warehouse Units) [HERE](https://learn.microsoft.com/en-us/azure/synapse-analytics/sql-data-warehouse/what-is-a-data-warehouse-unit-dwu-cdwu)
 
-After the database was created, tables definition was added. Notice that an extra column was added, with a unique ID, using the IDENTITY [(seed , increment)] function. This will automatically add an increasing and unique number per row, once the data is loaded. In synapse analytics, the generated ID's are incremental, per partiton, so there might be some gaps on ID generation.
+After the database was created, tables definitions was added. Notice that an extra column was added, with a unique ID, using the IDENTITY [(seed , increment)] function. This will automatically add an increasing and unique number per row, once the data is loaded. In synapse analytics, values for identity aren't incremental due to the distributed architecture of the data warehouse, so there might be some gaps on ID generation.
 
+The different tables were created using a replicated distribution (equal across processing nodes) and CLUSTERED COLUMNSTORE INDEX as the storage type.
 
+```sql
+-- Creating Tables
+-- Note: Tables created in synape analytics SQL pool does not suport foreight keys
+CREATE TABLE dbo.Athletes
+(
+    AthleteID INT PRIMARY KEY NONCLUSTERED NOT ENFORCED IDENTITY(1,1) NOT NULL, --IDENTITY [ (seed , increment) ] seed is the first value and increment is the amount added to the previous row
+    Country NVARCHAR(80) NULL,
+    Discipline NVARCHAR(80) NOT NULL,
+    FirstName NVARCHAR(50) NULL,
+    LastName NVARCHAR(50) NULL
+)
+WITH
+(
+    DISTRIBUTION = REPLICATE,
+    CLUSTERED COLUMNSTORE INDEX
+);
 
+CREATE TABLE dbo.Coaches
+(
+    CoacheID INT PRIMARY KEY NONCLUSTERED NOT ENFORCED IDENTITY NOT NULL,
+    Country NVARCHAR(80) NULL,
+    Discipline NVARCHAR(80) NOT NULL,
+    Event NVARCHAR(50) NULL
+)
+WITH
+(
+    DISTRIBUTION = REPLICATE,
+    CLUSTERED COLUMNSTORE INDEX
+);
+```
+To load data into the table, the COPY INTO statement was used with IDENTITY_INSERT = 'OFF'. In this way, the column with the unique ID, previously created most not be specified.
+
+```sql
+COPY INTO dbo.Athletes
+    (Country, Discipline, FirstName, LastName )
+FROM 'https://tokyoolympicsraul.dfs.core.windows.net/tokyo-olympics-container/transformed-data/Athletes_transformed/**.csv'
+WITH
+(
+    FILE_TYPE = 'CSV',
+    MAXERRORS = 0,
+    IDENTITY_INSERT = 'OFF'
+);
+
+COPY INTO dbo.Coaches
+    (Name, Country, Discipline, Event)
+FROM 'https://tokyoolympicsraul.dfs.core.windows.net/tokyo-olympics-container/transformed-data/Coaches/**.csv'
+WITH
+(
+    FILE_TYPE = 'CSV',
+    MAXERRORS = 0,
+    IDENTITY_INSERT = 'OFF'
+);
+```
 
 ### Data Analysis
