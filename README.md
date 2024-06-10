@@ -297,5 +297,14 @@ GO
 --DROP EXTERNAL FILE FORMAT CsvFormat
 ```
 
+### Dedicated SQL Pool
+As previously mentioned Synapse Analytics will host the SQL database where data will be loaded, this type of dedicated SQL pool requires a running server that implies extra costs. Nevertheless it acts more like a "regular" database, storing data and allowing for more advanced operations and table relations. As note, Synapse Analytics Dedicated SQL Pool is optimized for data warehousing workloads, having some limitations, such as defining foreight keys.
+
+The first step of creating the database is to start a SQL pool (server), for this project the chosen performance was DW100c. More info on DWU's (Data Warehouse Units) [HERE](https://learn.microsoft.com/en-us/azure/synapse-analytics/sql-data-warehouse/what-is-a-data-warehouse-unit-dwu-cdwu)
+
+After the database was created, tables definition was added. Notice that an extra column was added, with a unique ID, using the IDENTITY [(seed , increment)] function. This will automatically add an increasing and unique number per row, once the data is loaded. In synapse analytics, the generated ID's are incremental, per partiton, so there might be some gaps on ID generation.
+
+
+
 
 ### Data Analysis
