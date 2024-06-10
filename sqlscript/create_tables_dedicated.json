@@ -1,8 +1,8 @@
 {
-	"name": "create_tables",
+	"name": "create_tables_dedicated",
 	"properties": {
 		"content": {
-			"query": "DROP TABLE dbo.Athletes\n\n-- Tables created in synape analytics SQL pool does not suport primary and foreight keys, since the \nCREATE TABLE dbo.Athletes\n(\n    AthleteID INT PRIMARY KEY NONCLUSTERED NOT ENFORCED IDENTITY(1,1) NOT NULL, --IDENTITY [ (seed , increment) ] seed is the first value and increment is the amount added to the previous row\n    Country NVARCHAR(80) NULL,\n    Discipline NVARCHAR(80) NOT NULL,\n    FirstName NVARCHAR(50) NULL,\n    LastName NVARCHAR(50) NULL\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE\n    --CLUSTERED COLUMNSTORE INDEX\n);\n\nDROP TABLE dbo.Coaches\n\nCREATE TABLE dbo.Coaches\n(\n    CoacheID INT IDENTITY NOT NULL,\n    Country NVARCHAR(80) NULL,\n    Discipline NVARCHAR(80) NOT NULL,\n    Event NVARCHAR(50) NULL\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n);\n\n\n",
+			"query": "DROP TABLE dbo.Athletes\n\n-- Tables created in synape analytics SQL pool does not suport foreight keys\nCREATE TABLE dbo.Athletes\n(\n    AthleteID INT PRIMARY KEY NONCLUSTERED NOT ENFORCED IDENTITY(1,1) NOT NULL, --IDENTITY [ (seed , increment) ] seed is the first value and increment is the amount added to the previous row\n    Country NVARCHAR(80) NULL,\n    Discipline NVARCHAR(80) NOT NULL,\n    FirstName NVARCHAR(50) NULL,\n    LastName NVARCHAR(50) NULL\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE\n    --CLUSTERED COLUMNSTORE INDEX\n);\n\nDROP TABLE dbo.Coaches\n\nCREATE TABLE dbo.Coaches\n(\n    CoacheID INT IDENTITY NOT NULL,\n    Country NVARCHAR(80) NULL,\n    Discipline NVARCHAR(80) NOT NULL,\n    Event NVARCHAR(50) NULL\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n);\n\n\nSELECT * FROM dbo.Athletes\nORDER BY AthleteID ",
 			"metadata": {
 				"language": "sql"
 			},
