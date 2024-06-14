@@ -6,12 +6,12 @@ The aim of this project is to create an ETL pipeline to first extract data from 
 
 This pipeline uses tools from Azure, including Data Factory, Databricks, Data Lake Storage Gen2 and Synapse Analytics. PowerBi might be added in the future, for visualizations.
 
-To keep things simple I've added the source data to github, in csv format, from where Data Factory can connect and ingest data.
+To keep things simple, I've added the source data to github, in csv format, from where Data Factory can connect and ingest data.
 
 ## Table of Contents
 
-- [Arquitecture overview](#Arquitecture-Overview)
-- [Source of data](#Source-of-data)
+- [Architecture Overview](#Architecture-Overview)
+- [Source of Data](#Source-of-data)
 - [Data Ingestion](#Data-Ingestion)
 - [Data Storage](#Data-Storage)
 - [Data Transformation](#Data-Transformation)
@@ -19,7 +19,7 @@ To keep things simple I've added the source data to github, in csv format, from 
 - [Data Analysis](#Data-Analysis)
 
 
-## Arquitecture Overview
+## Architecture Overview
 
 ![Pipeline2 drawio (1)](https://github.com/RaulSTeixeira/Azure-tokyo-olympics-project/assets/118553146/1ce08a90-a100-4a06-bbdf-edf539824b56)
 - Data Factory was used to ingest data, using as source type HTTP (csv files hosted in Github) and sinking data to Data Lake Storage Gen2;
@@ -74,7 +74,7 @@ For data ingestion a pipeline was developed in Data Factory, using the Copy data
 ```
 
 To keep things simple, the authentication method was kept as anonymous.
-For the Sink, a linked service to Data Lake Gen2 was made to a previously created container. In this container two folders were defined, one for the raw_data and another to the transformed_data (used at a later stage). Again using DelimitedText format (CSV) and the first row as header.
+For the Sink, a linked service to Data Lake Gen2 was made to a previously created container. In this container two folders were defined, one for the raw_data and another to the transformed_data (used at a later stage). Again, using DelimitedText format (CSV) and the first row as header.
 
 Since data factory only stores the most recent version of a pipeline (after publishing), data factory was connected to github to allow version control and track of changes. Since this is a personal project, every change was published in the master branch.
 
@@ -82,7 +82,7 @@ Here is a preview of the pipeline:
 ![data factory pipeline3](https://github.com/RaulSTeixeira/Azure-tokyo-olympics-project/assets/118553146/bb5386a6-60b7-44bd-bbe6-449c537c0225)
 
 ## Data Transformation
-After data ingestion, Databricks was used to performe some transformations. The first step was to connect databricks to data lake storage, which was performed using mounting storage. Databricks enables users to mount cloud object storage to the Databricks File System (DBFS) to simplify data access. More information is available [HERE](https://docs.databricks.com/en/dbfs/mounts.html)
+After data ingestion, Databricks was used to perform some transformations. The first step was to connect databricks to data lake storage, which was performed using mounting storage. Databricks enables users to mount cloud object storage to the Databricks File System (DBFS) to simplify data access. More information is available [HERE](https://docs.databricks.com/en/dbfs/mounts.html)
 
 ```python
  # Establish connection with ADLS
@@ -99,7 +99,7 @@ mount_point = "/mnt/tokyoolympic",
 extra_configs = configs)
 ```
 
-NOTE: This connection methode was used to keep things simple, but it is not the recomended way to perform this connection, for more information on how to properly connect databricks to data lake, see [HERE](https://docs.databricks.com/en/connect/storage/azure-storage.html#language-Azure%C2%A0service%C2%A0principal)
+NOTE: This connection method was used to keep things simple, but it is not the recommended way to perform this connection, for more information on how to properly connect databricks to data lake, see [HERE](https://docs.databricks.com/en/connect/storage/azure-storage.html#language-Azure%C2%A0service%C2%A0principal)
 
 Databricks automaticaly creates a spark session, that you can retrieve some information by using the command "spark".
 
@@ -118,7 +118,7 @@ AppName
 Databricks Shell
 ```
 
-The CSV files were read and converted to spark dataframes using PySpark, mantaining original schema and headers. The athletes full name was separeted into first and last name.
+The CSV files were read and converted to spark dataframes using PySpark, maintaining original schema and headers. The athletes full name was separated into first and last name.
 
 ```python
 # Create a function to read and convert all csv files in a specific folder, the function also outputs the structure and a snipet of each dataframe
@@ -188,7 +188,8 @@ WHERE Country = 'Portugal'
 GROUP BY LastName
 ORDER BY name_count DESC
 ```
-It is also possible to convert spark dataframes to pandas dataframes, allowing to use a widly used sintax.
+
+It is also possible to convert spark dataframes to pandas dataframes, enabling the use of a commonly recognized syntax.
 
 ```python
 EntriesGender_pandas_df = EntriesGender.select("*").toPandas()
@@ -196,7 +197,7 @@ EntriesGender_pandas_df = EntriesGender.select("*").toPandas()
 EntriesGender_pandas_df['Avg_Female'] = EntriesGender_pandas_df['Female'] / EntriesGender_pandas_df['Total']
 EntriesGender_pandas_df['Avg_Male'] = 1 - EntriesGender_pandas_df['Avg_Female']
 ```
-Finaly after the transformations, all the modified dataframes were writen back do azure datalake.
+Finaly after the transformations, all the modified dataframes were written back do azure datalake.
 
 ```python
 # Write modified dataframes back to Azure Data Lake
@@ -212,7 +213,7 @@ write_df(df_names)
 ## Data Load
 ### Serverless
 During the creation of the Synapse Analytics workspace is necessary to create or select a Data Lake Storage Gen2, serving as the primary storage account for the workspace, holding catalog data and metadata.
-Since i have selected the previously created Data Lake, where olympics data files are already stored, they automatically become acessible from synapse analytics.
+Since I have selected the previously created Data Lake, where olympics data files are already stored, they automatically become accessible from synapse analytics.
 
 Using the serverless SQL pool available by default in Synapse Analytics, it's a simple way to read the content and structure of the files from our datalake.
 
@@ -230,7 +231,7 @@ FROM
     ) AS [result]
 
 ```
-It is also possible to create a database in a serverless SQL pool, by defining an external datasource (in this case the datalake), an external file format and finally external tables. This provides a relational database layer over files in a data lake, allowing the usage of standard SQL query semantics. This type of tables also have the advantage of always being up-to-date once the data ingestion is performed, since they only store metadata. Droping external tables does not delete the source data, only the stored metadata.
+It is also possible to create a database in a serverless SQL pool, by defining an external datasource (in this case the datalake), an external file format and finally external tables. This provides a relational database layer over files in a data lake, allowing the usage of standard SQL query semantics. This type of tables also has the advantage of always being up-to-date once the data ingestion is performed, since they only store metadata. Droping external tables does not delete the source data, only the stored metadata.
 
 Here is an example of creating external tables, just for the athletes and coaches:
 
@@ -298,11 +299,11 @@ GO
 ```
 
 ### Dedicated SQL Pool
-As previously mentioned Synapse Analytics will host the SQL database where data will be loaded, this type of dedicated SQL pool requires a running server that implies extra costs (usually charged by hour, instead of charged by query). Nevertheless it acts more like a "regular" database, storing data, metadata and allowing for more advanced operations and table relations. As a note, Synapse Analytics Dedicated SQL Pool is optimized for data warehousing workloads, having some limitations, such as defining foreight keys.
+As previously mentioned, Synapse Analytics will host the SQL database where data will be loaded, this type of dedicated SQL pool requires a running server that implies extra costs (usually charged by hour, instead of charged by query). Nevertheless, it acts more like a "regular" database, storing data, metadata and allowing for more advanced operations and table relations. As a note, Synapse Analytics Dedicated SQL Pool is optimized for data warehousing workloads, having some limitations, such as defining foreign keys.
 
 The first step of creating the database is to start a SQL pool (server), for this project the chosen performance was DW100c. More info on DWU's (Data Warehouse Units) [HERE](https://learn.microsoft.com/en-us/azure/synapse-analytics/sql-data-warehouse/what-is-a-data-warehouse-unit-dwu-cdwu)
 
-After the database was created, tables definitions was added. Notice that an extra column was added, with a unique ID, using the IDENTITY [(seed , increment)] function. This will automatically add an increasing and unique number per row, once the data is loaded. In synapse analytics, values for identity aren't incremental due to the distributed architecture of the data warehouse, so there might be some gaps on ID generation.
+After the database was created, tables definitions were added. Notice that an extra column was added, with a unique ID, using the IDENTITY [(seed , increment)] function. This will automatically add an increasing and unique number per row, once the data is loaded. In synapse analytics, values for identity aren't incremental due to the distributed architecture of the data warehouse, so there might be some gaps on ID generation.
 
 The different tables were created using a replicated distribution (equal across processing nodes) and CLUSTERED COLUMNSTORE INDEX as the storage type.
 
