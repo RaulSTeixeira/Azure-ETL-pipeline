@@ -41,36 +41,9 @@
 			"properties": {
 				"activities": [
 					{
-						"name": "Data Transformation",
-						"type": "DatabricksNotebook",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"notebookPath": "/Users/raul.manuel2024@outlook.com/tokyo_olympic_data_processing"
-						},
-						"linkedServiceName": {
-							"referenceName": "AzureDatabricksLS",
-							"type": "LinkedServiceReference"
-						}
-					},
-					{
 						"name": "SQL pool stored procedure1",
 						"type": "SqlPoolStoredProcedure",
-						"dependsOn": [
-							{
-								"activity": "Data Transformation",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
+						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
 							"retry": 0,
@@ -94,7 +67,6 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('workspaceId'), '/linkedServices/AzureDatabricksLS')]",
 				"[concat(variables('workspaceId'), '/sqlPools/tokyo_olympics_DB2')]"
 			]
 		},
