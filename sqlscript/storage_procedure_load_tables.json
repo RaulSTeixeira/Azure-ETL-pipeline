@@ -1,0 +1,17 @@
+{
+	"name": "storage_procedure_load_tables",
+	"properties": {
+		"content": {
+			"query": "CREATE PROCEDURE usp_special_orders_by_year @order_year INT\nAS\nBEGIN\n    TRUNCATE TABLE dbo.Athletes\n    GO\n    \n    COPY INTO dbo.Athletes\n        (Country, Discipline, FirstName, LastName )\n    FROM 'https://tokyoolympicsraul.dfs.core.windows.net/tokyo-olympics-container/transformed-data/Athletes_transformed/**.csv'\n    WITH\n    (\n        FILE_TYPE = 'CSV',\n        MAXERRORS = 0,\n        IDENTITY_INSERT = 'OFF',\n        FIRSTROW = 1\n    );\n\nEND",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
