@@ -3,13 +3,13 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "SQL pool stored procedure1",
+				"name": "SQL pool stored procedure",
 				"type": "SqlPoolStoredProcedure",
 				"dependsOn": [
 					{
-						"activity": "Notebook1",
+						"activity": "Data Transformations",
 						"dependencyConditions": [
-							"Completed"
+							"Succeeded"
 						]
 					}
 				],
@@ -30,8 +30,28 @@
 				}
 			},
 			{
-				"name": "Notebook1",
+				"name": "Data Transformations",
 				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Copy data",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": []
+			},
+			{
+				"name": "Copy data",
+				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -42,11 +62,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Users/raul.manuel2024@outlook.com/tokyo_olympic_data_processing"
-				},
-				"linkedServiceName": {
-					"referenceName": "AzureDatabricks1",
-					"type": "LinkedServiceReference"
+					"enableStaging": false
 				}
 			}
 		],
