@@ -211,7 +211,9 @@ df_names = ["Athletes_transformed", "Coaches", "EntriesGender", "Medals", "Teams
 write_df(df_names)
 ```
 ## Data Load
-### Serverless
+In this stage, tranformed data from the csv files is loaded into a database. Two options were explored, (i) using a serverless SQL pool with external tables and (ii) using a dedicated SQL pool storing data and metadata. Synapse Analytics was connected to github to perform version control.
+
+### Serverless SQL pool
 During the creation of the Synapse Analytics workspace is necessary to create or select a Data Lake Storage Gen2, serving as the primary storage account for the workspace, holding catalog data and metadata.
 Since I have selected the previously created Data Lake, where olympics data files are already stored, they automatically become accessible from synapse analytics.
 
