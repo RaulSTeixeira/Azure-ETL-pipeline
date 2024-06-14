@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 2",
+	"properties": {
+		"content": {
+			"query": "Select * From dbo.EntriesGender\n\nSELECT * FROM INFORMATION_SCHEMA.COLUMNS\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "tokyo_olympics_DB2",
+				"poolName": "tokyo_olympics_DB2"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
