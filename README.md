@@ -231,7 +231,7 @@ FROM
     ) AS [result]
 
 ```
-It is also possible to create a database in a serverless SQL pool, by defining an external datasource (in this case the datalake), an external file format and finally external tables. This provides a relational database layer over files in a data lake, allowing the usage of standard SQL query semantics. This type of tables also has the advantage of always being up-to-date once the data ingestion is performed, since they only store metadata. Droping external tables does not delete the source data, only the stored metadata.
+It is also possible to create a database in a serverless SQL pool, by defining an external datasource (in this case the datalake), an external file format and finally external tables. This provides a relational database layer over files in a data lake, allowing the usage of standard SQL query semantics, but with some limitations compared to relational databases (ex. no relation between tables). This type of tables also has the advantage of always being up-to-date once the data ingestion is performed, since they only store metadata. Droping external tables does not delete the source data, only the stored metadata.
 
 Here is an example of creating external tables, just for the athletes and coaches:
 
