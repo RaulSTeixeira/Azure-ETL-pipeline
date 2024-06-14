@@ -7,6 +7,10 @@
 			"metadata": "Workspace name",
 			"defaultValue": "synapse-tokyo-olympics"
 		},
+		"AzureDatabricksLS_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'AzureDatabricksLS'"
+		},
 		"synapse-tokyo-olympics-WorkspaceDefaultSqlServer_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'synapse-tokyo-olympics-WorkspaceDefaultSqlServer'",
@@ -29,6 +33,98 @@
 				"annotations": []
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Pipeline 1')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data Transformation",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Users/raul.manuel2024@outlook.com/tokyo_olympic_data_processing"
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksLS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "SQL pool stored procedure1",
+						"type": "SqlPoolStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "Data Transformation",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"sqlPool": {
+							"referenceName": "tokyo_olympics_DB2",
+							"type": "SqlPoolReference"
+						},
+						"typeProperties": {
+							"storedProcedureName": "[dbo].[load_athletes]"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/AzureDatabricksLS')]",
+				"[concat(variables('workspaceId'), '/sqlPools/tokyo_olympics_DB2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AzureDatabricksLS')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDatabricks",
+				"typeProperties": {
+					"domain": "https://adb-2418774890541944.4.azuredatabricks.net",
+					"accessToken": {
+						"type": "SecureString",
+						"value": "[parameters('AzureDatabricksLS_accessToken')]"
+					},
+					"newClusterNodeType": "Standard_DS3_v2",
+					"newClusterNumOfWorker": "1",
+					"newClusterVersion": "13.3.x-scala2.12",
+					"clusterOption": "Fixed",
+					"newClusterInitScripts": []
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('workspaceName'), '/synapse-tokyo-olympics-WorkspaceDefaultSqlServer')]",
@@ -103,6 +199,46 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script 2')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "Select * From dbo.EntriesGender\n\nSELECT * FROM INFORMATION_SCHEMA.COLUMNS\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "tokyo_olympics_DB2",
+						"poolName": "tokyo_olympics_DB2"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script 3')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "-- This is auto-generated code\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://tokyoolympicsraul.dfs.core.windows.net/tokyo-olympics-container/transformed-data/EntriesGender/part-00000-tid-7532524863393269713-61da4fe9-5f5a-478d-8793-95b44c11df4c-224-1-c000.csv',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0'\n    ) AS [result]\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/create_external_tables_serverless')]",
 			"type": "Microsoft.Synapse/workspaces/sqlscripts",
 			"apiVersion": "2019-06-01-preview",
@@ -128,13 +264,13 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"content": {
-					"query": "-- Creating Tables\n-- Note: Tables created in synape analytics SQL pool does not suport foreight keys\nCREATE TABLE dbo.Athletes\n(\n    AthleteID INT PRIMARY KEY NONCLUSTERED NOT ENFORCED IDENTITY(1,1) NOT NULL, --IDENTITY [ (seed , increment) ] seed is the first value and increment is the amount added to the previous row\n    Country NVARCHAR(80) NULL,\n    Discipline NVARCHAR(80) NOT NULL,\n    FirstName NVARCHAR(50) NULL,\n    LastName NVARCHAR(50) NULL\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n);\n\nCREATE TABLE dbo.Coaches\n(\n    CoacheID INT PRIMARY KEY NONCLUSTERED NOT ENFORCED IDENTITY NOT NULL,\n    Name NVARCHAR(80) NULL,\n    Country NVARCHAR(80) NULL,\n    Discipline NVARCHAR(80) NOT NULL,\n    Event NVARCHAR(50) NULL\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n);\n\nCREATE TABLE dbo.Teams\n(\n    TeamID INT PRIMARY KEY NONCLUSTERED NOT ENFORCED IDENTITY NOT NULL,\n    TeamName NVARCHAR(80) NULL,\n    Discipline NVARCHAR(80) NOT NULL,\n    Country NVARCHAR(80) NOT NULL,\n    Event NVARCHAR(50) NULL\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n);\n\nCREATE TABLE dbo.EntriesGender\n(\n    Discipline NVARCHAR(80) NULL,\n    Female INT NULL,\n    Male INT NULL,\n    Total INT NULL\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n);\n\nCREATE TABLE dbo.Medals\n(\n    Rank INT NULL,\n    TeamCountry NVARCHAR(80) NOT NULL,\n    Gold INT NULL,\n    Silver INT NULL,\n    Bronze INT NULL,\n    Total INT NULL,\n    RankByTotal INT Null\n\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n);\n\n\n--SELECT Count(*) FROM dbo.Athletes\n--ORDER BY AthleteID\n\n--SELECT * FROM dbo.Coaches\n--ORDER BY CoacheID\n\n--DROP Table Athletes\n--Drop TABLE Coaches\n",
+					"query": "-- Creating Tables\n-- Note: Tables created in synape analytics SQL pool does not suport foreight keys\nCREATE TABLE dbo.Athletes\n(\n    AthleteID INT PRIMARY KEY NONCLUSTERED NOT ENFORCED IDENTITY(1,1) NOT NULL, --IDENTITY [ (seed , increment) ] seed is the first value and increment is the amount added to the previous row\n    Country NVARCHAR(80) NULL,\n    Discipline NVARCHAR(80) NOT NULL,\n    FirstName NVARCHAR(50) NULL,\n    LastName NVARCHAR(50) NULL\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n);\n\nCREATE TABLE dbo.Coaches\n(\n    CoacheID INT PRIMARY KEY NONCLUSTERED NOT ENFORCED IDENTITY NOT NULL,\n    Name NVARCHAR(80) NULL,\n    Country NVARCHAR(80) NULL,\n    Discipline NVARCHAR(80) NOT NULL,\n    Event NVARCHAR(50) NULL\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n);\n\nCREATE TABLE dbo.Teams\n(\n    TeamID INT PRIMARY KEY NONCLUSTERED NOT ENFORCED IDENTITY NOT NULL,\n    TeamName NVARCHAR(80) NULL,\n    Discipline NVARCHAR(80) NOT NULL,\n    Country NVARCHAR(80) NOT NULL,\n    Event NVARCHAR(50) NULL\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n);\n\nCREATE TABLE dbo.EntriesGender\n(\n    Discipline NVARCHAR(80) NULL,\n    Female NVARCHAR(80) NULL,\n    Male NVARCHAR(80) NULL,\n    Total NVARCHAR(80) NULL\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n);\n\nCREATE TABLE dbo.Medals\n(\n    Rank NVARCHAR(80) NULL,\n    TeamCountry NVARCHAR(80) NOT NULL,\n    Gold NVARCHAR(80) NULL,\n    Silver NVARCHAR(80) NULL,\n    Bronze NVARCHAR(80) NULL,\n    Total NVARCHAR(80) NULL,\n    RankByTotal NVARCHAR(80) Null\n\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n);\n\n\n--SELECT Count(*) FROM dbo.Athletes\n--ORDER BY AthleteID\n\n--SELECT * FROM dbo.Coaches\n--ORDER BY CoacheID\n\n--DROP Table Athletes\n--Drop TABLE Coaches\nDrop TABLE dbo.Medals\n",
 					"metadata": {
 						"language": "sql"
 					},
 					"currentConnection": {
-						"databaseName": "tokyo_olympics_DB",
-						"poolName": "tokyo_olympics_DB"
+						"databaseName": "tokyo_olympics_DB2",
+						"poolName": "tokyo_olympics_DB2"
 					},
 					"resultLimit": 5000
 				},
@@ -148,13 +284,13 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"content": {
-					"query": "TRUNCATE TABLE dbo.Athletes\n\nCOPY INTO dbo.Athletes\n    (Country, Discipline, FirstName, LastName )\nFROM 'https://tokyoolympicsraul.dfs.core.windows.net/tokyo-olympics-container/transformed-data/Athletes_transformed/**.csv'\nWITH\n(\n    FILE_TYPE = 'CSV',\n    MAXERRORS = 0,\n    IDENTITY_INSERT = 'OFF'\n);\n\nTRUNCATE TABLE dbo.Coaches\n\nCOPY INTO dbo.Coaches\n    (Name, Country, Discipline, Event)\nFROM 'https://tokyoolympicsraul.dfs.core.windows.net/tokyo-olympics-container/transformed-data/Coaches/**.csv'\nWITH\n(\n    FILE_TYPE = 'CSV',\n    MAXERRORS = 0,\n    IDENTITY_INSERT = 'OFF'\n);\n\nTRUNCATE TABLE dbo.Teams\n\nCOPY INTO dbo.Teams\n    (TeamName, Discipline, Country, Event)\nFROM 'https://tokyoolympicsraul.dfs.core.windows.net/tokyo-olympics-container/transformed-data/Teams/**.csv'\nWITH\n(\n    FILE_TYPE = 'CSV',\n    MAXERRORS = 0,\n    IDENTITY_INSERT = 'OFF'\n);\n\nTRUNCATE TABLE dbo.EntriesGender\n\nCOPY INTO dbo.EntriesGender\n    (Discipline, Female, Male, Total)\nFROM 'https://tokyoolympicsraul.dfs.core.windows.net/tokyo-olympics-container/transformed-data/Teams/**.csv'\nWITH\n(\n    FILE_TYPE = 'CSV',\n    MAXERRORS = 0,\n    IDENTITY_INSERT = 'OFF'\n);\n\nTRUNCATE TABLE dbo.Medals\n\nCOPY INTO dbo.Medals\n    (Rank, TeamCountry, Gold, Silver, Bronze, Total, RankBytotal)\nFROM 'https://tokyoolympicsraul.dfs.core.windows.net/tokyo-olympics-container/transformed-data/Teams/**.csv'\nWITH\n(\n    FILE_TYPE = 'CSV',\n    MAXERRORS = 0,\n    IDENTITY_INSERT = 'OFF'\n);",
+					"query": "TRUNCATE TABLE dbo.Athletes\n\nCOPY INTO dbo.Athletes\n    (Country, Discipline, FirstName, LastName )\nFROM 'https://tokyoolympicsraul.dfs.core.windows.net/tokyo-olympics-container/transformed-data/Athletes_transformed/**.csv'\nWITH\n(\n    FILE_TYPE = 'CSV',\n    MAXERRORS = 0,\n    IDENTITY_INSERT = 'OFF',\n    FIRSTROW = 1\n);\n\nTRUNCATE TABLE dbo.Coaches\n\nCOPY INTO dbo.Coaches\n    (Name, Country, Discipline, Event)\nFROM 'https://tokyoolympicsraul.dfs.core.windows.net/tokyo-olympics-container/transformed-data/Coaches/**.csv'\nWITH\n(\n    FILE_TYPE = 'CSV',\n    MAXERRORS = 0,\n    IDENTITY_INSERT = 'OFF',\n    FIRSTROW = 1\n);\n\nTRUNCATE TABLE dbo.Teams\n\nCOPY INTO dbo.Teams\n    (TeamName, Discipline, Country, Event)\nFROM 'https://tokyoolympicsraul.dfs.core.windows.net/tokyo-olympics-container/transformed-data/Teams/**.csv'\nWITH\n(\n    FILE_TYPE = 'CSV',\n    MAXERRORS = 0,\n    IDENTITY_INSERT = 'OFF',\n    FIRSTROW = 1\n);\n\nTRUNCATE TABLE dbo.EntriesGender\n\nCOPY INTO dbo.EntriesGender\n    (Discipline, Female, Male, Total)\nFROM 'https://tokyoolympicsraul.dfs.core.windows.net/tokyo-olympics-container/transformed-data/EntriesGender/**.csv'\nWITH\n(\n    FILE_TYPE = 'CSV',\n    MAXERRORS = 0,\n    IDENTITY_INSERT = 'OFF',\n    FIRSTROW = 1\n);\n\nTRUNCATE TABLE dbo.Medals\n\nCOPY INTO dbo.Medals\n    (Rank, TeamCountry, Gold, Silver, Bronze, Total, RankBytotal)\nFROM 'https://tokyoolympicsraul.dfs.core.windows.net/tokyo-olympics-container/transformed-data/Medals/**.csv'\nWITH\n(\n    FILE_TYPE = 'CSV',\n    MAXERRORS = 0,\n    IDENTITY_INSERT = 'OFF',\n    FIRSTROW = 1\n);",
 					"metadata": {
 						"language": "sql"
 					},
 					"currentConnection": {
-						"databaseName": "tokyo_olympics_DB",
-						"poolName": "tokyo_olympics_DB"
+						"databaseName": "tokyo_olympics_DB2",
+						"poolName": "tokyo_olympics_DB2"
 					},
 					"resultLimit": 5000
 				},
@@ -175,6 +311,26 @@
 					"currentConnection": {
 						"databaseName": "master",
 						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/storage_procedure_load_tables')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "CREATE PROCEDURE load_athletes\nAS\nBEGIN\n        TRUNCATE TABLE tokyo_olympics.dbo.Athletes;\n        \n        COPY INTO tokyo_olympics.dbo.Athletes\n            (Country, Discipline, FirstName, LastName )\n        FROM 'https://tokyoolympicsraul.dfs.core.windows.net/tokyo-olympics-container/transformed-data/Athletes_transformed/**.csv'\n        WITH\n        (\n            FILE_TYPE = 'CSV',\n            MAXERRORS = 0,\n            IDENTITY_INSERT = 'OFF',\n            FIRSTROW = 1\n        )\nEND",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "tokyo_olympics_DB2",
+						"poolName": "tokyo_olympics_DB2"
 					},
 					"resultLimit": 5000
 				},
