@@ -16,7 +16,7 @@ To keep things simple, I've added the source data to github, in csv format, from
 - [Data Storage](#Data-Storage)
 - [Data Transformation](#Data-Transformation)
 - [Data Load](#Data-Load)
-- [Data Analysis](#Data-Analysis)
+- [Creating a pipeline](#Creating-a-pipeline)
 
 
 ## Architecture Overview
@@ -364,7 +364,6 @@ WITH
     IDENTITY_INSERT = 'OFF'
 );
 ```
-### Data Analysis
 
 ## Creating a pipeline
 
