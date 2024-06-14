@@ -20,8 +20,8 @@ To keep things simple, I've added the source data to github, in csv format, from
 
 
 ## Architecture Overview
+![Pipeline3 drawio](https://github.com/RaulSTeixeira/Azure-tokyo-olympics-project/assets/118553146/2caf9d37-d8de-4e60-8b95-eac6b446a603)
 
-![Pipeline2 drawio (1)](https://github.com/RaulSTeixeira/Azure-tokyo-olympics-project/assets/118553146/1ce08a90-a100-4a06-bbdf-edf539824b56)
 - Data Factory was used to ingest data, using as source type HTTP (csv files hosted in Github) and sinking data to Data Lake Storage Gen2;
 - DataBricks was connected to Data Lake and used to transform data;
 - Synapse Analytics hosted the SQL database and was connected to Data Lake;
@@ -339,7 +339,9 @@ WITH
     CLUSTERED COLUMNSTORE INDEX
 );
 ```
-To load data into the table, the COPY INTO statement was used with IDENTITY_INSERT = 'OFF'. In this way, the column with the unique ID, previously created most not be specified.
+
+To load data into each table, the COPY INTO statement was used with IDENTITY_INSERT = 'OFF'. In this way is not required to specify the column with the unique ID previously created.
+The file location must also be specified, here the ** serves as a wildcard to indicate that all CSV files in a folder will be read (in this case is just one since only one partions was defined in databricks).
 
 ```sql
 COPY INTO dbo.Athletes
