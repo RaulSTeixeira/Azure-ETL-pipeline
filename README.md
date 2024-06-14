@@ -364,5 +364,33 @@ WITH
     IDENTITY_INSERT = 'OFF'
 );
 ```
-
 ### Data Analysis
+
+## Creating a pipeline
+
+The different processes defined until now need to be put together, in a single pipeline, so that the ETL process can be scheduled or automated. This can be performed using synapse analytics pipelines, and it will consist of 3 different activities: (i) copy activity, like the one defined in Data Factory. This will extract the CSV files and place them in the data lake. (ii) Databricks Notebook activity, this calls the notebook defined previously performing the necessary transformations. (iii) SQL Pool Stored procedure, this will call the SQL script that loads the database tables.
+
+![synape pipeline](https://github.com/RaulSTeixeira/Azure-tokyo-olympics-project/assets/118553146/49c6bf99-6c7e-43e5-96c0-ee2ff0973340)
+
+The stored procedure makes it easier to operationalize data transformations, and for this specific case, to load tables. Input variables can also be defined, that alter the storage procedure beavior.
+
+```sql
+CREATE PROCEDURE [dbo].[load_athletes] 
+@first_row_read INT,
+@max_errors INT
+AS
+BEGIN
+    TRUNCATE TABLE dbo.Athletes;
+        
+        COPY INTO dbo.Athletes
+            (Country, Discipline, FirstName, LastName )
+        FROM 'https://tokyoolympicsraul.dfs.core.windows.net/tokyo-olympics-container/transformed-data/Athletes_transformed/**.csv'
+        WITH
+        (
+            FILE_TYPE = 'CSV',
+            MAXERRORS = @max_errors,
+            IDENTITY_INSERT = 'OFF',
+            FIRSTROW = @first_row_read
+        )
+END
+```
