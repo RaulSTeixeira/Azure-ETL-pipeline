@@ -22,6 +22,15 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('workspaceName'), '/tokyo_olympics_DB2')]",
+			"type": "Microsoft.Synapse/workspaces/sqlPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/synapse-tokyo-olympics-WorkspaceDefaultSqlServer')]",
 			"type": "Microsoft.Synapse/workspaces/linkedServices",
 			"apiVersion": "2019-06-01-preview",
@@ -119,7 +128,7 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"content": {
-					"query": "-- Creating Tables\n-- Note: Tables created in synape analytics SQL pool does not suport foreight keys\nCREATE TABLE dbo.Athletes\n(\n    AthleteID INT PRIMARY KEY NONCLUSTERED NOT ENFORCED IDENTITY(1,1) NOT NULL, --IDENTITY [ (seed , increment) ] seed is the first value and increment is the amount added to the previous row\n    Country NVARCHAR(80) NULL,\n    Discipline NVARCHAR(80) NOT NULL,\n    FirstName NVARCHAR(50) NULL,\n    LastName NVARCHAR(50) NULL\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n);\n\nCREATE TABLE dbo.Coaches\n(\n    CoacheID INT PRIMARY KEY NONCLUSTERED NOT ENFORCED IDENTITY NOT NULL,\n    Country NVARCHAR(80) NULL,\n    Discipline NVARCHAR(80) NOT NULL,\n    Event NVARCHAR(50) NULL\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n);\n\nCREATE TABLE dbo.Teams\n(\n    TeamID INT PRIMARY KEY NONCLUSTERED NOT ENFORCED IDENTITY NOT NULL,\n    TeamName NVARCHAR(80) NULL,\n    Discipline NVARCHAR(80) NOT NULL,\n    Event NVARCHAR(50) NULL\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n);\n\nCREATE TABLE dbo.EntriesGender\n(\n    Discipline NVARCHAR(80) NULL,\n    Female Int NOT NULL,\n    Male Int NULL,\n    Total Int NULL\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n);\n\nCREATE TABLE dbo.Medals\n(\n    Rank INT NULL,\n    Team_Country NVARCHAR(80) NOT NULL,\n    Gold Int NULL,\n    Silver Int NULL,\n    Bronze Int NULL,\n    Total Int NULL,\n    RankByTotal Int Null\n\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n);\n\n\nSELECT Count(*) FROM dbo.Athletes\nORDER BY AthleteID\n\n--SELECT * FROM dbo.Coaches\n--ORDER BY CoacheID\n\n--DROP Table Athletes\n--Drop TABLE Coaches\n",
+					"query": "-- Creating Tables\n-- Note: Tables created in synape analytics SQL pool does not suport foreight keys\nCREATE TABLE dbo.Athletes\n(\n    AthleteID INT PRIMARY KEY NONCLUSTERED NOT ENFORCED IDENTITY(1,1) NOT NULL, --IDENTITY [ (seed , increment) ] seed is the first value and increment is the amount added to the previous row\n    Country NVARCHAR(80) NULL,\n    Discipline NVARCHAR(80) NOT NULL,\n    FirstName NVARCHAR(50) NULL,\n    LastName NVARCHAR(50) NULL\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n);\n\nCREATE TABLE dbo.Coaches\n(\n    CoacheID INT PRIMARY KEY NONCLUSTERED NOT ENFORCED IDENTITY NOT NULL,\n    Name NVARCHAR(80) NULL,\n    Country NVARCHAR(80) NULL,\n    Discipline NVARCHAR(80) NOT NULL,\n    Event NVARCHAR(50) NULL\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n);\n\nCREATE TABLE dbo.Teams\n(\n    TeamID INT PRIMARY KEY NONCLUSTERED NOT ENFORCED IDENTITY NOT NULL,\n    TeamName NVARCHAR(80) NULL,\n    Discipline NVARCHAR(80) NOT NULL,\n    Country NVARCHAR(80) NOT NULL,\n    Event NVARCHAR(50) NULL\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n);\n\nCREATE TABLE dbo.EntriesGender\n(\n    Discipline NVARCHAR(80) NULL,\n    Female INT NOT NULL,\n    Male INT NULL,\n    Total INT NULL\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n);\n\nCREATE TABLE dbo.Medals\n(\n    Rank INT NULL,\n    Team_Country NVARCHAR(80) NOT NULL,\n    Gold INT NULL,\n    Silver INT NULL,\n    Bronze INT NULL,\n    Total INT NULL,\n    RankByTotal INT Null\n\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE,\n    CLUSTERED COLUMNSTORE INDEX\n);\n\n\n--SELECT Count(*) FROM dbo.Athletes\n--ORDER BY AthleteID\n\n--SELECT * FROM dbo.Coaches\n--ORDER BY CoacheID\n\n--DROP Table Athletes\n--Drop TABLE Coaches\n",
 					"metadata": {
 						"language": "sql"
 					},
@@ -428,6 +437,113 @@
 						"ActionType": "CREATE",
 						"OldEntity": null,
 						"NewEntity": {
+							"Name": "EntriesGender",
+							"EntityType": "TABLE",
+							"Namespace": {
+								"DatabaseName": "tokyo_olympics_lake_database"
+							},
+							"Description": "",
+							"TableType": "EXTERNAL",
+							"Origin": {
+								"Type": "SPARK"
+							},
+							"StorageDescriptor": {
+								"Columns": [
+									{
+										"Name": "Discipline",
+										"OriginDataTypeName": {
+											"TypeName": "string",
+											"IsComplexType": false,
+											"IsNullable": true,
+											"Length": 8000,
+											"Properties": {
+												"HIVE_TYPE_STRING": "string"
+											}
+										}
+									},
+									{
+										"Name": "Female",
+										"OriginDataTypeName": {
+											"TypeName": "long",
+											"IsComplexType": false,
+											"IsNullable": true,
+											"Properties": {
+												"HIVE_TYPE_STRING": "long"
+											}
+										}
+									},
+									{
+										"Name": "Male",
+										"OriginDataTypeName": {
+											"TypeName": "long",
+											"IsComplexType": false,
+											"IsNullable": true,
+											"Properties": {
+												"HIVE_TYPE_STRING": "long"
+											}
+										}
+									},
+									{
+										"Name": "Total",
+										"OriginDataTypeName": {
+											"TypeName": "long",
+											"IsComplexType": false,
+											"IsNullable": true,
+											"Properties": {
+												"HIVE_TYPE_STRING": "long"
+											}
+										}
+									}
+								],
+								"Format": {
+									"InputFormat": "org.apache.hadoop.mapred.SequenceFileInputFormat",
+									"OutputFormat": "org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat",
+									"FormatType": "csv",
+									"SerializeLib": "org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe",
+									"Properties": {
+										"path": "abfss://tokyo-olympics-container@tokyoolympicsraul.dfs.core.windows.net/transformed-data/EntriesGender",
+										"delimiter": ",",
+										"firstRowAsHeader": "true",
+										"multiLine": "false",
+										"serialization.format": "1",
+										"FormatTypeSetToDatabaseDefault": false,
+										"header": "true"
+									}
+								},
+								"Source": {
+									"Provider": "ADLS",
+									"Location": "abfss://tokyo-olympics-container@tokyoolympicsraul.dfs.core.windows.net/transformed-data/EntriesGender",
+									"Properties": {
+										"LinkedServiceName": "synapse-tokyo-olympics-WorkspaceDefaultStorage",
+										"LocationSetToDatabaseDefault": false
+									}
+								},
+								"Properties": {
+									"textinputformat.record.delimiter": ",",
+									"compression": "",
+									"derivedModelAttributeInfo": "{\"attributeReferences\":{}}"
+								},
+								"Compressed": false,
+								"IsStoredAsSubdirectories": false
+							},
+							"Properties": {
+								"Description": "",
+								"DisplayFolderInfo": "{\"name\":\"Others\",\"colorCode\":\"\"}",
+								"PrimaryKeys": "",
+								"spark.sql.sources.provider": "csv"
+							},
+							"Retention": 0,
+							"Temporary": false,
+							"IsRewriteEnabled": false
+						},
+						"Source": {
+							"Type": "SPARK"
+						}
+					},
+					{
+						"ActionType": "CREATE",
+						"OldEntity": null,
+						"NewEntity": {
 							"Name": "relationship-vuirayvngi",
 							"EntityType": "RELATIONSHIP",
 							"Namespace": {
@@ -456,7 +572,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/tokyo_olympics_DB')]",
+			"name": "[concat(parameters('workspaceName'), '/tokyo_olympics_DB2')]",
 			"type": "Microsoft.Synapse/workspaces/sqlPools",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
