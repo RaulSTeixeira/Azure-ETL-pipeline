@@ -1,0 +1,22 @@
+{
+	"name": "tokyo_olympics_lake_database",
+	"properties": {
+		"Name": "tokyo_olympics_lake_database",
+		"EntityType": "DATABASE",
+		"Origin": {
+			"Type": "SPARK"
+		},
+		"Properties": {
+			"IsSyMSCDMDatabase": true
+		},
+		"Source": {
+			"Provider": "ADLS",
+			"Location": "abfss://tokyo-olympics-container@tokyoolympicsraul.dfs.core.windows.net/transformed-data",
+			"Properties": {
+				"FormatType": "csv",
+				"LinkedServiceName": "synapse-tokyo-olympics-WorkspaceDefaultStorage"
+			}
+		}
+	},
+	"type": "DATABASE"
+}
